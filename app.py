@@ -97,7 +97,8 @@ def auto_27():
         return None
     max_qty = max(inv[k]["qty"] for k in items)
     max_items = [k for k in items if inv[k]["qty"] == max_qty]
-    chosen = random.choice(max_items)  # random if multiple
+    chosen = random.choice(max_items)
+    # **Sirf 1 item minus**
     update_qty(chosen, inv[chosen]["qty"] - 1)
     return chosen
 
@@ -112,13 +113,14 @@ def index():
         game = request.form.get("game")
         result = request.form.get("result")
         winner = request.form.get("winner")
-        loser = request.form.get("loser") or auto_27()
+        loser = request.form.get("loser")  # may be AUTO
         money_ball = request.form.get("money_ball")
 
         g20 = battle = g150 = g250 = money_games = money_profit = 0
         revenue = 0
         prize_msg = ""
 
+        # ------------------ Game Logic ------------------
         if game == "20":
             revenue = 20
             g20 = 1
@@ -127,12 +129,17 @@ def index():
                 prize_msg = f"🎉 Winner: {prize}"
             else:
                 prize_msg = "😞 Loser gets no prize"
+
         elif game == "Battle":
             revenue = 220
             battle = 1
             win = give_prize(winner)
-            lose = give_prize(loser)
+            if not loser or loser=="AUTO":
+                lose = auto_27()
+            else:
+                lose = give_prize(loser)
             prize_msg = f"🏆 Winner: {win} | 🎁 Loser: {lose}"
+
         elif game == "150":
             revenue = 150
             g150 = 1
@@ -140,18 +147,30 @@ def index():
                 prize = give_prize("Spandex Toy")
                 prize_msg = f"🎉 Winner: {prize}"
             else:
-                lose = give_prize(loser)
+                if not loser or loser=="AUTO":
+                    lose = auto_27()
+                else:
+                    lose = give_prize(loser)
                 prize_msg = f"🎁 Loser got: {lose}"
+
         elif game == "250":
             revenue = 250
             g250 = 1
             if result == "Win":
                 prize1 = give_prize(winner)
-                prize2 = give_prize(loser) or auto_27()
+                # Second prize auto 27 or user selected
+                if not loser or loser=="AUTO":
+                    prize2 = auto_27()
+                else:
+                    prize2 = give_prize(loser)
                 prize_msg = f"🎉 Winner: {prize1} + {prize2}"
             else:
-                lose = give_prize(loser)
+                if not loser or loser=="AUTO":
+                    lose = auto_27()
+                else:
+                    lose = give_prize(loser)
                 prize_msg = f"🎁 Loser got: {lose}"
+
         elif game == "Money":
             revenue = 100
             money_games = 1
@@ -168,24 +187,17 @@ def index():
         update_stats(revenue, g20, battle, g150, g250, money_games, money_profit)
         session['message'] = prize_msg
 
-        # POST-Redirect-GET fix
+        # POST-Redirect-GET
         return redirect(url_for('index'))
 
     message = session.pop('message', '')
     return render_template("index.html", inventory=inv, stats=stats, message=message)
 
-
+# ------------------ Report ------------------
 @app.route("/report")
 def report():
     stats = get_stats()
     inv = get_inventory()
-
-    # Total cost spent
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("SELECT name, qty, cp FROM inventory")
-    current_inv = c.fetchall()
-    conn.close()
 
     initial_items = {
         "Turtle": (56, 27), "Mini Rabbit": (30, 27), "Parrot": (20, 27),
@@ -196,7 +208,7 @@ def report():
         "Penguin": (1, 150), "Giant Teddy": (1, 1500)
     }
     spent = 0
-    for name, qty, cp in current_inv:
+    for name, qty, cp in inv.items():
         init_qty, cost = initial_items[name]
         spent += (init_qty - qty) * cost
 
@@ -207,4 +219,3 @@ def report():
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=5000)
-
