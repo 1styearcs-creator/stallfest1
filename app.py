@@ -184,7 +184,7 @@ def index():
 
             if money_ball == "0":
                 revenue = 100
-                money_profit = 100
+                #money_profit = 0
                 prize_msg = "0 Ball: Revenue +100, Profit +100"
             elif money_ball == "1":
                 revenue = 0
@@ -192,7 +192,7 @@ def index():
                 prize_msg = "1 Ball: Revenue 0, Profit 0"
             elif money_ball == "2":
                 revenue = -900
-                money_profit = -900
+                #money_profit = -900
                 prize_msg = "2 Ball: Revenue -900, Profit -900"
 
         # Update stats with the final revenue and profit
