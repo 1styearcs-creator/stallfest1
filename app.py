@@ -1,21 +1,20 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
-import random 
+import random
 
 app = Flask(__name__)
+app.secret_key = "secret123"
 DB = "stall_data.db"
 
-# --- Initialize DB ---
+# ------------------ DB Init ------------------
 def init_db():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
-    # Inventory table
     c.execute("""CREATE TABLE IF NOT EXISTS inventory(
         name TEXT PRIMARY KEY,
         qty INTEGER,
         cp INTEGER
     )""")
-    # Stats table
     c.execute("""CREATE TABLE IF NOT EXISTS stats(
         id INTEGER PRIMARY KEY,
         revenue INTEGER,
@@ -26,7 +25,7 @@ def init_db():
         money_games INTEGER,
         money_profit INTEGER
     )""")
-    # Default inventory
+    # Inventory default
     if c.execute("SELECT COUNT(*) FROM inventory").fetchone()[0]==0:
         items=[
             ("Turtle",56,27),("Mini Rabbit",30,27),("Parrot",20,27),
@@ -37,12 +36,13 @@ def init_db():
             ("Penguin",1,150),("Giant Teddy",1,1500)
         ]
         c.executemany("INSERT INTO inventory VALUES (?,?,?)", items)
-    # Default stats
+    # Stats default
     if c.execute("SELECT COUNT(*) FROM stats").fetchone()[0]==0:
         c.execute("INSERT INTO stats VALUES (1,0,0,0,0,0,0,0)")
     conn.commit()
     conn.close()
 
+# ------------------ Inventory ------------------
 def get_inventory():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -58,6 +58,7 @@ def update_qty(name,new_qty):
     conn.commit()
     conn.close()
 
+# ------------------ Stats ------------------
 def get_stats():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -81,36 +82,31 @@ def update_stats(revenue=0,g20=0,battle=0,g150=0,g250=0,money_games=0,money_prof
     conn.commit()
     conn.close()
 
+# ------------------ Prize ------------------
 def give_prize(name):
     inv = get_inventory()
     if not name or inv.get(name,{"qty":0})["qty"]<=0:
         return None
-    update_qty(name,inv[name]["qty"]-1)
+    update_qty(name, inv[name]["qty"]-1)
     return name
-
 
 def auto_27():
     inv = get_inventory()
-    # Only 27₹ toys with qty>0
     items=[k for k in inv if inv[k]["cp"]==27 and inv[k]["qty"]>0]
     if not items:
         return None
-    # Find max quantity
     max_qty = max(inv[k]["qty"] for k in items)
-    # All toys with max quantity
     max_items = [k for k in items if inv[k]["qty"]==max_qty]
-    # Pick one randomly
     chosen = random.choice(max_items)
     update_qty(chosen, inv[chosen]["qty"]-1)
     return chosen
 
-# --- Routes ---
+# ------------------ Routes ------------------
 @app.route("/", methods=["GET","POST"])
 def index():
     inv = get_inventory()
     stats = get_stats()
     message=""
-    selected_buttons={}
 
     if request.method=="POST":
         game = request.form.get("game")
@@ -128,38 +124,30 @@ def index():
             if result=="Win":
                 prize = give_prize(winner)
                 prize_msg=f"🎉 Winner: {prize}"
-                selected_buttons["winner"]=winner
-            elif result=="Lose":
-                prize_msg=f"😞 Loser gets no prize"
+            else:
+                prize_msg="😞 Loser gets no prize"
         elif game=="Battle":
             revenue=220; battle=1
             win = give_prize(winner)
             lose = give_prize(loser)
             prize_msg=f"🏆 Winner: {win} | 🎁 Loser: {lose}"
-            selected_buttons["winner"]=winner
-            selected_buttons["loser"]=loser
         elif game=="150":
             revenue=150; g150=1
             if result=="Win":
                 prize = give_prize("Spandex Toy")
                 prize_msg=f"🎉 Winner: {prize}"
-                selected_buttons["winner"]="Spandex Toy"
             else:
                 lose = give_prize(loser)
                 prize_msg=f"🎁 Loser got: {lose}"
-                selected_buttons["loser"]=lose
         elif game=="250":
             revenue=250; g250=1
             if result=="Win":
                 prize1 = give_prize(winner)
                 prize2 = give_prize(loser) or auto_27()
                 prize_msg=f"🎉 Winner: {prize1} + {prize2}"
-                selected_buttons["winner"]=prize1
-                selected_buttons["loser"]=prize2
             else:
                 lose = give_prize(loser)
                 prize_msg=f"🎁 Loser got: {lose}"
-                selected_buttons["loser"]=lose
         elif game=="Money":
             revenue=100; money_games=1
             if money_ball=="0":
@@ -168,27 +156,28 @@ def index():
                 money_profit=0; prize_msg="1 Ball: Profit 0"
             elif money_ball=="2":
                 money_profit=-1000; prize_msg="2 Ball: Profit -1000"
-            selected_buttons["money_ball"]=money_ball
 
         update_stats(revenue,g20,battle,g150,g250,money_games,money_profit)
-        message=prize_msg
+        session['message'] = prize_msg
 
-    return render_template("index.html",inventory=inv,stats=get_stats(),
-                           message=message,selected_buttons=selected_buttons)
+        # POST-Redirect-GET fix
+        return redirect(url_for('index'))
+
+    message = session.pop('message','')
+    return render_template("index.html", inventory=inv, stats=stats, message=message)
 
 @app.route("/report")
 def report():
     stats = get_stats()
     inv = get_inventory()
-    
-    # Total cost of given toys
+
+    # Total cost spent
     conn = sqlite3.connect(DB)
     c = conn.cursor()
     c.execute("SELECT name, qty, cp FROM inventory")
     current_inv = c.fetchall()
     conn.close()
 
-    # Total cost spent = initial inventory cost - current inventory cost
     initial_items = {
         "Turtle":(56,27),"Mini Rabbit":(30,27),"Parrot":(20,27),
         "Heart":(21,27),"Dog":(50,27),"Cat":(75,27),
@@ -202,9 +191,9 @@ def report():
         init_qty, cost = initial_items[name]
         spent += (init_qty - qty)*cost
 
-    total_profit = stats[1] - spent + stats[7]  # revenue - cost + money_profit
+    total_profit = stats[1] - spent + stats[7]
 
-    return render_template("report.html",stats=stats,inventory=inv,profit=total_profit)
+    return render_template("report.html", stats=stats, inventory=inv, profit=total_profit)
 
 if __name__=="__main__":
     init_db()
