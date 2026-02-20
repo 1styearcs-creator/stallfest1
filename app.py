@@ -25,7 +25,6 @@ def init_db():
         money_games INTEGER,
         money_profit INTEGER
     )""")
-    # Inventory default
     if c.execute("SELECT COUNT(*) FROM inventory").fetchone()[0]==0:
         items = [
             ("Turtle", 56, 27), ("Mini Rabbit", 30, 27), ("Parrot", 20, 27),
@@ -36,7 +35,6 @@ def init_db():
             ("Penguin", 1, 150), ("Giant Teddy", 1, 1500)
         ]
         c.executemany("INSERT INTO inventory VALUES (?,?,?)", items)
-    # Stats default
     if c.execute("SELECT COUNT(*) FROM stats").fetchone()[0]==0:
         c.execute("INSERT INTO stats VALUES (1,0,0,0,0,0,0,0)")
     conn.commit()
@@ -97,7 +95,7 @@ def auto_27():
         return None
     max_qty = max(inv[k]["qty"] for k in items)
     max_items = [k for k in items if inv[k]["qty"] == max_qty]
-    chosen = random.choice(max_items)  # random if multiple
+    chosen = random.choice(max_items)
     update_qty(chosen, inv[chosen]["qty"] - 1)
     return chosen
 
@@ -119,6 +117,7 @@ def index():
         revenue = 0
         prize_msg = ""
 
+        # 20₹ GAME
         if game == "20":
             revenue = 20
             g20 = 1
@@ -127,6 +126,8 @@ def index():
                 prize_msg = f"🎉 Winner: {prize}"
             else:
                 prize_msg = "😞 Loser gets no prize"
+
+        # BATTLE
         elif game == "Battle":
             revenue = 220
             battle = 1
@@ -136,6 +137,8 @@ def index():
             else:
                 lose = give_prize(loser)
             prize_msg = f"🏆 Winner: {win} | 🎁 Loser: {lose}"
+
+        # 150₹ GAME
         elif game == "150":
             revenue = 150
             g150 = 1
@@ -148,40 +151,50 @@ def index():
                 else:
                     lose = give_prize(loser)
                 prize_msg = f"🎁 Loser got: {lose}"
+
+        # 250₹ GAME
         elif game == "250":
             revenue = 250
             g250 = 1
             if result == "Win":
+                # First prize = winner category
+                prize1 = give_prize(winner)
+                # Second prize = loser category or auto max 27₹
+                if not loser or loser == "AUTO":
+                    prize2 = auto_27()
+                else:
+                    prize2 = give_prize(loser)
+                prize_msg = f"🎉 Winner got: {prize1} + {prize2}"
+            else:
+                # Lose case, optional loser prize
                 if not loser or loser == "AUTO":
                     lose = auto_27()
                 else:
                     lose = give_prize(loser)
                 prize_msg = f"🎁 Loser got: {lose}"
+
         # MONEY GAME
-        elif selected_game == "Money":
+        elif game == "Money":
             money_games = 1
-            if not money_choice:
-                messagebox.showerror("Error", "Select Ball Outcome")
-                return
-            
-            # Money Game Logic for 0, 1, and 2 ball
-            if money_choice == "0":
+            if not money_ball:
+                prize_msg = "Select Ball Outcome"
+                return render_template("index.html", inventory=inv, stats=stats, message=prize_msg)
+            if money_ball == "0":
                 revenue = 100
                 money_profit = 100
-                msg = "0 Ball: Revenue +100, Profit +100"
-            elif money_choice == "1":
+                prize_msg = "0 Ball: Revenue +100, Profit +100"
+            elif money_ball == "1":
                 revenue = 0
                 money_profit = 0
-                msg = "1 Ball: Revenue 0, Profit 0"
-            elif money_choice == "2":
+                prize_msg = "1 Ball: Revenue 0, Profit 0"
+            elif money_ball == "2":
                 revenue = -900
                 money_profit = -900
-                msg = "2 Ball: Revenue -900, Profit -900"
+                prize_msg = "2 Ball: Revenue -900, Profit -900"
 
-    update_stats(revenue, 0, g20, b, g150, g250, money_games, money_profit)
+        # Update stats
+        update_stats(revenue, g20, battle, g150, g250, money_games, money_profit)
         session['message'] = prize_msg
-
-        # POST-Redirect-GET fix
         return redirect(url_for('index'))
 
     message = session.pop('message', '')
@@ -192,25 +205,19 @@ def report():
     stats = get_stats()
     inv = get_inventory()
 
-    # Total cost spent
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("SELECT name, qty, cp FROM inventory")
-    current_inv = c.fetchall()
-    conn.close()
-
     initial_items = {
-        "Turtle": (56, 27), "Mini Rabbit": (30, 27), "Parrot": (20, 27),
-        "Heart": (21, 27), "Dog": (50, 27), "Cat": (75, 27),
-        "Giraffe": (20, 40), "Elephant": (20, 40),
-        "Rabbit Big": (20, 42), "Camel": (20, 40),
-        "Mini Teddy": (20, 45), "Spandex Toy": (9, 90),
-        "Penguin": (1, 150), "Giant Teddy": (1, 1500)
+        "Turtle": 56, "Mini Rabbit": 30, "Parrot": 20,
+        "Heart": 21, "Dog": 50, "Cat": 75,
+        "Giraffe": 20, "Elephant": 20,
+        "Rabbit Big": 20, "Camel": 20,
+        "Mini Teddy": 20, "Spandex Toy": 9,
+        "Penguin": 1, "Giant Teddy": 1
     }
+
     spent = 0
-    for name, qty, cp in current_inv:
-        init_qty, cost = initial_items[name]
-        spent += (init_qty - qty) * cost
+    for name, data in inv.items():
+        init_qty = initial_items.get(name, data["qty"])
+        spent += (init_qty - data["qty"]) * data["cp"]
 
     total_profit = stats[1] - spent + stats[7]
 
