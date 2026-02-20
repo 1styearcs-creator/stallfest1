@@ -11,12 +11,12 @@ body {
     margin:0;
     padding:0;
 }
-h1,h2 {text-align:center;}
+h1,h2 {text-align:center; margin:5px 0;}
 .container {padding:10px; display:flex; flex-direction:column; align-items:center;}
 button {
     font-size:1.2em;
     margin:5px;
-    padding:15px 20px;
+    padding:12px 15px;
     border:none;
     border-radius:10px;
     cursor:pointer;
@@ -24,9 +24,10 @@ button {
 button.selected {background-color:#ff69b4; color:white;}
 button.winner {background-color:#32CD32; color:white;}
 button.loser {background-color:#FF4500; color:white;}
-.message {margin:10px; font-size:1.3em; font-weight:bold; text-align:center; color:#00008B;}
+.message {margin:10px; font-size:1.2em; font-weight:bold; text-align:center; color:#00008B;}
 .game-section {border:2px solid #000; border-radius:15px; padding:10px; margin:10px; width:95%;}
 .flex-buttons {display:flex; flex-wrap:wrap; justify-content:center;}
+.play-btn {background-color:#1E90FF;color:white;font-size:1.3em;padding:12px 20px;margin-top:10px;}
 </style>
 </head>
 <body>
@@ -35,70 +36,114 @@ button.loser {background-color:#FF4500; color:white;}
 
 <div class="message" id="message">{{ message }}</div>
 
-<form method="POST">
+<form method="POST" id="gameForm">
+
 <div class="game-section">
 <h2>Choose Game</h2>
 <div class="flex-buttons">
-<button type="submit" name="game" value="20" onclick="selectBtn(this)">20₹ Coin Game</button>
-<button type="submit" name="game" value="Battle" onclick="selectBtn(this)">Battle Game 220₹</button>
-<button type="submit" name="game" value="150" onclick="selectBtn(this)">Bottle Game 150₹</button>
-<button type="submit" name="game" value="250" onclick="selectBtn(this)">Jackpot 250₹</button>
-<button type="submit" name="game" value="Money" onclick="selectBtn(this)">Money Game 100₹</button>
-</div>
-</div>
-
-<div class="game-section">
-<h2>Result</h2>
-<div class="flex-buttons">
-<button type="submit" name="result" value="Win" onclick="selectBtn(this)">Win</button>
-<button type="submit" name="result" value="Lose" onclick="selectBtn(this)">Lose</button>
-</div>
-</div>
-
-<div class="game-section">
-<h2>Winner Prize</h2>
-<div class="flex-buttons">
-{% for item in inventory %}
-<button type="submit" name="winner" value="{{item}}" onclick="selectBtn(this)">{{item}} ({{inventory[item]['qty']}})</button>
+{% for g, label in [('20','20₹ Coin Game'),('Battle','Battle Game 220₹'),('150','Bottle Game 150₹'),('250','Jackpot 250₹'),('Money','Money Game 100₹')] %}
+<button type="button" onclick="selectGame('{{g}}', this)">{{label}}</button>
 {% endfor %}
 </div>
 </div>
 
-<div class="game-section">
+<div class="game-section" id="resultSection" style="display:none;">
+<h2>Result</h2>
+<div class="flex-buttons">
+<button type="button" onclick="selectResult('Win', this)">Win</button>
+<button type="button" onclick="selectResult('Lose', this)">Lose</button>
+</div>
+</div>
+
+<div class="game-section" id="winnerSection" style="display:none;">
+<h2>Winner Prize</h2>
+<div class="flex-buttons">
+{% for item in inventory %}
+<button type="button" onclick="selectWinner('{{item}}', this)">{{item}} ({{inventory[item]['qty']}})</button>
+{% endfor %}
+</div>
+</div>
+
+<div class="game-section" id="loserSection" style="display:none;">
 <h2>Loser Prize</h2>
 <div class="flex-buttons">
 {% for item in inventory %}
 {% if inventory[item]['cp']==27 %}
-<button type="submit" name="loser" value="{{item}}" onclick="selectBtn(this)">{{item}} ({{inventory[item]['qty']}})</button>
+<button type="button" onclick="selectLoser('{{item}}', this)">{{item}} ({{inventory[item]['qty']}})</button>
 {% endif %}
 {% endfor %}
-<button type="submit" name="loser" value="" onclick="selectBtn(this)">Auto 27₹ Prize</button>
+<button type="button" onclick="selectLoser('AUTO', this)">Auto 27₹ Prize</button>
 </div>
 </div>
 
-<div class="game-section">
+<div class="game-section" id="moneySection" style="display:none;">
 <h2>Money Game Balls</h2>
 <div class="flex-buttons">
-<button type="submit" name="money_ball" value="0" onclick="selectBtn(this)">0 Ball</button>
-<button type="submit" name="money_ball" value="1" onclick="selectBtn(this)">1 Ball</button>
-<button type="submit" name="money_ball" value="2" onclick="selectBtn(this)">2 Ball</button>
+<button type="button" onclick="selectMoney('0', this)">0 Ball</button>
+<button type="button" onclick="selectMoney('1', this)">1 Ball</button>
+<button type="button" onclick="selectMoney('2', this)">2 Ball</button>
 </div>
 </div>
 
-<div class="flex-buttons">
+<button type="submit" class="play-btn" id="playBtn" style="display:none;">Play Game</button>
+
+<div class="flex-buttons" style="margin-top:10px;">
 <a href="/report"><button type="button">View Sales Report</button></a>
 </div>
+
+<input type="hidden" name="game" id="gameInput">
+<input type="hidden" name="result" id="resultInput">
+<input type="hidden" name="winner" id="winnerInput">
+<input type="hidden" name="loser" id="loserInput">
+<input type="hidden" name="money_ball" id="moneyInput">
 
 </form>
 </div>
 
 <script>
-function selectBtn(btn){
-    // Remove selected from siblings
-    let buttons = btn.parentNode.querySelectorAll('button');
+let selectedGame="",selectedResult="",selectedWinner="",selectedLoser="",selectedMoney="";
+
+function highlightBtn(btn, parentSelector){
+    let buttons = document.querySelectorAll(parentSelector+' button');
     buttons.forEach(b=>b.classList.remove('selected'));
     btn.classList.add('selected');
 }
+
+function selectGame(game, btn){
+    selectedGame = game;
+    document.getElementById("gameInput").value=game;
+    highlightBtn(btn,'div.flex-buttons');
+    document.getElementById("resultSection").style.display="flex";
+    document.getElementById("winnerSection").style.display="flex";
+    document.getElementById("loserSection").style.display="flex";
+    document.getElementById("moneySection").style.display=(game=="Money")?"flex":"none";
+    document.getElementById("playBtn").style.display="inline-block";
+}
+
+function selectResult(res, btn){
+    selectedResult = res;
+    document.getElementById("resultInput").value=res;
+    highlightBtn(btn,'#resultSection');
+}
+
+function selectWinner(winner, btn){
+    selectedWinner = winner;
+    document.getElementById("winnerInput").value=winner;
+    highlightBtn(btn,'#winnerSection');
+}
+
+function selectLoser(loser, btn){
+    selectedLoser = loser;
+    document.getElementById("loserInput").value=loser;
+    highlightBtn(btn,'#loserSection');
+}
+
+function selectMoney(ball, btn){
+    selectedMoney = ball;
+    document.getElementById("moneyInput").value=ball;
+    highlightBtn(btn,'#moneySection');
+}
+
 </script>
 
 </body>
