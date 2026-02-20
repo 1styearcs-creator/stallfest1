@@ -157,16 +157,13 @@ def index():
             revenue = 250
             g250 = 1
             if result == "Win":
-                # First prize = winner category
                 prize1 = give_prize(winner)
-                # Second prize = loser category or auto max 27₹
                 if not loser or loser == "AUTO":
                     prize2 = auto_27()
                 else:
                     prize2 = give_prize(loser)
                 prize_msg = f"🎉 Winner got: {prize1} + {prize2}"
             else:
-                # Lose case, optional loser prize
                 if not loser or loser == "AUTO":
                     lose = auto_27()
                 else:
@@ -175,12 +172,15 @@ def index():
 
         # MONEY GAME
         elif game == "Money":
-            # MONEY GAME
             money_games = 1
             if not money_ball:
                 prize_msg = "Select Ball Outcome"
                 return render_template("index.html", inventory=inv, stats=stats, message=prize_msg)
-            
+
+            # Reset revenue & profit before adding
+            revenue = 0
+            money_profit = 0
+
             if money_ball == "0":
                 revenue = 100
                 money_profit = 100
@@ -194,7 +194,7 @@ def index():
                 money_profit = -900
                 prize_msg = "2 Ball: Revenue -900, Profit -900"
 
-        # Update stats
+        # **Update stats only once**
         update_stats(revenue, g20, battle, g150, g250, money_games, money_profit)
         session['message'] = prize_msg
         return redirect(url_for('index'))
