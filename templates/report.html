@@ -1,116 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Report</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #FFE4B5;
-    margin:0;
-    padding:0;
-}
-h1,h2 {
-    text-align:center;
-    margin: 15px;
-    color: #ff6347;
-}
-table {
-    width:95%;
-    margin: 10px auto;
-    border-collapse: collapse;
-}
-th, td {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    text-align: center;
-    font-size: 1em;
-}
-th {
-    background-color: #ffb6c1;
-    color: #fff;
-}
-td {
-    background-color: #f9f9f9;
-}
-button {
-    background-color: #1E90FF;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    font-size: 1.1em;
-    cursor: pointer;
-    margin: 10px 0;
-    width: auto;
-}
-button:hover {
-    background-color: #4682b4;
-}
-a {
-    text-decoration: none;
-}
-.flex-buttons {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-.message {
-    font-size: 1.2em;
-    font-weight: bold;
-    text-align: center;
-    color: #00008B;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #ff5722;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        header h1 {
+            font-size: 40px;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <h1>Sales Report</h1>
+    </header>
+    <div class="container">
+        <div class="stats-section">
+            <h2>Stats</h2>
+            <table class="report-table">
+                <tr>
+                    <th>Total Revenue</th>
+                    <th>Total 20₹ Games</th>
+                    <th>Total Battle Games</th>
+                    <th>Total 150₹ Games</th>
+                    <th>Total 250₹ Games</th>
+                    <th>Total Money Games</th>
+                    <th>Total Profit/Loss</th>
+                </tr>
+                <tr>
+                    <td>{{ stats[1] }}</td>
+                    <td>{{ stats[2] }}</td>
+                    <td>{{ stats[3] }}</td>
+                    <td>{{ stats[4] }}</td>
+                    <td>{{ stats[5] }}</td>
+                    <td>{{ stats[6] }}</td>
+                    <td>{{ profit }}</td>
+                </tr>
+            </table>
+        </div>
 
-<h1>📊 StallFest Sales Report</h1>
-
-<!-- Stats Table -->
-<h2>Stats</h2>
-<table>
-    <tr>
-        <th>Revenue</th><th>20₹</th><th>Battle</th><th>150₹</th><th>250₹</th><th>Money Games</th><th>Money Profit</th>
-    </tr>
-    <tr>
-        <td>{{ stats[1] }}</td>
-        <td>{{ stats[2] }}</td>
-        <td>{{ stats[3] }}</td>
-        <td>{{ stats[4] }}</td>
-        <td>{{ stats[5] }}</td>
-        <td>{{ stats[6] }}</td>
-        <td>{{ stats[7] }}</td>
-    </tr>
-</table>
-
-<!-- Overall Profit / Loss -->
-<h2>Overall Profit / Loss</h2>
-<table>
-    <tr>
-        <th>Total Profit / Loss</th>
-    </tr>
-    <tr>
-        <td>{{ profit }}</td>
-    </tr>
-</table>
-
-<!-- Inventory Table -->
-<h2>Inventory</h2>
-<table>
-    <tr><th>Item</th><th>Qty</th><th>Cost Price</th></tr>
-    {% for item in inventory %}
-    <tr>
-        <td>{{item}}</td>
-        <td>{{inventory[item]['qty']}}</td>
-        <td>{{inventory[item]['cp']}}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-<div class="flex-buttons">
-    <a href="/"><button>Back to Stall</button></a>
-</div>
-
+        <div class="inventory-section">
+            <h2>Inventory</h2>
+            <table class="report-table">
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Cost Price</th>
+                </tr>
+                {% for toy, data in inventory.items() %}
+                    <tr>
+                        <td>{{ toy }}</td>
+                        <td>{{ data.qty }}</td>
+                        <td>{{ data.cp }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
 </body>
 </html>
