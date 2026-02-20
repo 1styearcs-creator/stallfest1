@@ -4,6 +4,7 @@ import sqlite3
 app = Flask(__name__)
 DB = "stall_data.db"
 
+# --- Initialize DB ---
 def init_db():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -92,12 +93,14 @@ def auto_27():
     if not items: return None
     return max(items,key=lambda x:inv[x]["qty"])
 
+# --- Routes ---
 @app.route("/", methods=["GET","POST"])
 def index():
     inv = get_inventory()
     stats = get_stats()
     message=""
     selected_buttons={}
+
     if request.method=="POST":
         game = request.form.get("game")
         result = request.form.get("result")
@@ -115,6 +118,10 @@ def index():
                 prize = give_prize(winner)
                 prize_msg=f"🎉 Winner: {prize}"
                 selected_buttons["winner"]=winner
+            elif result=="Lose":
+                prize = give_prize(loser)
+                prize_msg=f"🎁 Loser got: {prize}"
+                selected_buttons["loser"]=loser
         elif game=="Battle":
             revenue=220; battle=1
             win = give_prize(winner)
@@ -130,7 +137,7 @@ def index():
                 selected_buttons["winner"]="Spandex Toy"
             else:
                 lose = give_prize(loser)
-                prize_msg=f"🎁 Lost got: {lose}"
+                prize_msg=f"🎁 Loser got: {lose}"
                 selected_buttons["loser"]=lose
         elif game=="250":
             revenue=250; g250=1
@@ -142,7 +149,7 @@ def index():
                 selected_buttons["loser"]=prize2
             else:
                 lose = give_prize(loser)
-                prize_msg=f"🎁 Lost got: {lose}"
+                prize_msg=f"🎁 Loser got: {lose}"
                 selected_buttons["loser"]=lose
         elif game=="Money":
             revenue=100; money_games=1
