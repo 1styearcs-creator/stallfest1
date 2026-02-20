@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 import sqlite3
 
 app = Flask(__name__)
@@ -31,7 +31,8 @@ def init_db():
             ("Heart",21,27),("Dog",50,27),("Cat",75,27),
             ("Giraffe",20,40),("Elephant",20,40),
             ("Rabbit Big",20,42),("Camel",20,40),
-            ("Mini Teddy",20,45),("Spandex Toy",9,90)
+            ("Mini Teddy",20,45),("Spandex Toy",9,90),
+            ("Penguin",1,150),("Giant Teddy",1,1500)
         ]
         c.executemany("INSERT INTO inventory VALUES (?,?,?)", items)
     # Default stats
@@ -40,7 +41,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Helpers
 def get_inventory():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -81,7 +81,7 @@ def update_stats(revenue=0,g20=0,battle=0,g150=0,g250=0,money_games=0,money_prof
 
 def give_prize(name):
     inv = get_inventory()
-    if not name or inv[name]["qty"]<=0:
+    if not name or inv.get(name,{"qty":0})["qty"]<=0:
         return None
     update_qty(name,inv[name]["qty"]-1)
     return name
@@ -92,12 +92,12 @@ def auto_27():
     if not items: return None
     return max(items,key=lambda x:inv[x]["qty"])
 
-# Routes
 @app.route("/", methods=["GET","POST"])
 def index():
     inv = get_inventory()
     stats = get_stats()
     message=""
+    selected_buttons={}
     if request.method=="POST":
         game = request.form.get("game")
         result = request.form.get("result")
@@ -114,28 +114,36 @@ def index():
             if result=="Win":
                 prize = give_prize(winner)
                 prize_msg=f"🎉 Winner: {prize}"
+                selected_buttons["winner"]=winner
         elif game=="Battle":
             revenue=220; battle=1
             win = give_prize(winner)
             lose = give_prize(loser)
             prize_msg=f"🏆 Winner: {win} | 🎁 Loser: {lose}"
+            selected_buttons["winner"]=winner
+            selected_buttons["loser"]=loser
         elif game=="150":
             revenue=150; g150=1
             if result=="Win":
                 prize = give_prize("Spandex Toy")
                 prize_msg=f"🎉 Winner: {prize}"
+                selected_buttons["winner"]="Spandex Toy"
             else:
                 lose = give_prize(loser)
                 prize_msg=f"🎁 Lost got: {lose}"
+                selected_buttons["loser"]=lose
         elif game=="250":
             revenue=250; g250=1
             if result=="Win":
                 prize1 = give_prize(winner)
                 prize2 = give_prize(loser) or auto_27()
                 prize_msg=f"🎉 Winner: {prize1} + {prize2}"
+                selected_buttons["winner"]=prize1
+                selected_buttons["loser"]=prize2
             else:
                 lose = give_prize(loser)
                 prize_msg=f"🎁 Lost got: {lose}"
+                selected_buttons["loser"]=lose
         elif game=="Money":
             revenue=100; money_games=1
             if money_ball=="0":
@@ -144,11 +152,13 @@ def index():
                 money_profit=0; prize_msg="1 Ball: Profit 0"
             elif money_ball=="2":
                 money_profit=-1000; prize_msg="2 Ball: Profit -1000"
+            selected_buttons["money_ball"]=money_ball
 
         update_stats(revenue,g20,battle,g150,g250,money_games,money_profit)
         message=prize_msg
 
-    return render_template("index.html",inventory=inv,stats=get_stats(),message=message)
+    return render_template("index.html",inventory=inv,stats=get_stats(),
+                           message=message,selected_buttons=selected_buttons)
 
 @app.route("/report")
 def report():
