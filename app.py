@@ -157,20 +157,28 @@ def index():
                 else:
                     lose = give_prize(loser)
                 prize_msg = f"🎁 Loser got: {lose}"
-        elif game == "Money":
-            revenue = 100
+        # MONEY GAME
+        elif selected_game == "Money":
             money_games = 1
-            if money_ball == "0":
+            if not money_choice:
+                messagebox.showerror("Error", "Select Ball Outcome")
+                return
+            
+            # Money Game Logic for 0, 1, and 2 ball
+            if money_choice == "0":
+                revenue = 100
                 money_profit = 100
-                prize_msg = "0 Ball: Profit +100"
-            elif money_ball == "1":
+                msg = "0 Ball: Revenue +100, Profit +100"
+            elif money_choice == "1":
+                revenue = 0
                 money_profit = 0
-                prize_msg = "1 Ball: Profit 0"
-            elif money_ball == "2":
-                money_profit = -1000
-                prize_msg = "2 Ball: Profit -1000"
+                msg = "1 Ball: Revenue 0, Profit 0"
+            elif money_choice == "2":
+                revenue = -900
+                money_profit = -900
+                msg = "2 Ball: Revenue -900, Profit -900"
 
-        update_stats(revenue, g20, battle, g150, g250, money_games, money_profit)
+    update_stats(revenue, 0, g20, b, g150, g250, money_games, money_profit)
         session['message'] = prize_msg
 
         # POST-Redirect-GET fix
