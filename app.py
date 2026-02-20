@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request
 import sqlite3
 
 app = Flask(__name__)
@@ -119,9 +119,7 @@ def index():
                 prize_msg=f"🎉 Winner: {prize}"
                 selected_buttons["winner"]=winner
             elif result=="Lose":
-                prize = give_prize(loser)
-                prize_msg=f"🎁 Loser got: {prize}"
-                selected_buttons["loser"]=loser
+                prize_msg=f"😞 Loser gets no prize"
         elif game=="Battle":
             revenue=220; battle=1
             win = give_prize(winner)
@@ -171,7 +169,31 @@ def index():
 def report():
     stats = get_stats()
     inv = get_inventory()
-    return render_template("report.html",stats=stats,inventory=inv)
+    
+    # Total cost of given toys
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("SELECT name, qty, cp FROM inventory")
+    current_inv = c.fetchall()
+    conn.close()
+
+    # Total cost spent = initial inventory cost - current inventory cost
+    initial_items = {
+        "Turtle":(56,27),"Mini Rabbit":(30,27),"Parrot":(20,27),
+        "Heart":(21,27),"Dog":(50,27),"Cat":(75,27),
+        "Giraffe":(20,40),"Elephant":(20,40),
+        "Rabbit Big":(20,42),"Camel":(20,40),
+        "Mini Teddy":(20,45),"Spandex Toy":(9,90),
+        "Penguin":(1,150),"Giant Teddy":(1,1500)
+    }
+    spent = 0
+    for name, qty, cp in current_inv:
+        init_qty, cost = initial_items[name]
+        spent += (init_qty - qty)*cost
+
+    total_profit = stats[1] - spent + stats[7]  # revenue - cost + money_profit
+
+    return render_template("report.html",stats=stats,inventory=inv,profit=total_profit)
 
 if __name__=="__main__":
     init_db()
