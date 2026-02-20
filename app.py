@@ -136,9 +136,6 @@ def index():
             if result=="Win":
                 prize = give_prize("Spandex Toy")
                 prize_msg=f"🎉 Winner: {prize}"
-            if loser=="AUTO" or loser=="":
-   
-    loser = auto_27()
             else:
                 lose = give_prize(loser)
                 prize_msg=f"🎁 Loser got: {lose}"
