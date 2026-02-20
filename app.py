@@ -112,7 +112,7 @@ def index():
         game = request.form.get("game")
         result = request.form.get("result")
         winner = request.form.get("winner")
-        loser = request.form.get("loser") or auto_27()
+        loser = request.form.get("loser") #or auto_27()
         money_ball = request.form.get("money_ball")
 
         g20=battle=g150=g250=money_games=money_profit=0
@@ -127,27 +127,46 @@ def index():
             else:
                 prize_msg="😞 Loser gets no prize"
         elif game=="Battle":
-            revenue=220; battle=1
+             revenue = 220
+            battle = 1
             win = give_prize(winner)
-            lose = give_prize(loser)
-            prize_msg=f"🏆 Winner: {win} | 🎁 Loser: {lose}"
+            if not loser or loser=="AUTO":
+                lose = auto_27()
+            else:
+                lose = give_prize(loser)
+            prize_msg = f"🏆 Winner: {win} | 🎁 Loser: {lose}"
+            #revenue=220; battle=1
+            #win = give_prize(winner)
+            #lose = give_prize(loser)
+            #prize_msg=f"🏆 Winner: {win} | 🎁 Loser: {lose}"
         elif game=="150":
             revenue=150; g150=1
             if result=="Win":
                 prize = give_prize("Spandex Toy")
                 prize_msg=f"🎉 Winner: {prize}"
             else:
-                lose = give_prize(loser)
-                prize_msg=f"🎁 Loser got: {lose}"
+                if not loser or loser=="AUTO":
+                    lose = auto_27()
+                else:
+                    lose = give_prize(loser)
+                prize_msg = f"🎁 Loser got: {lose}"
+                
+                #lose = give_prize(loser)
+                #prize_msg=f"🎁 Loser got: {lose}"
         elif game=="250":
             revenue=250; g250=1
             if result=="Win":
-                prize1 = give_prize(winner)
+                if not loser or loser=="AUTO":
+                    lose = auto_27()
+                else:
+                    lose = give_prize(loser)
+                prize_msg = f"🎁 Loser got: {lose}"
+                '''prize1 = give_prize(winner)
                 prize2 = give_prize(loser) or auto_27()
                 prize_msg=f"🎉 Winner: {prize1} + {prize2}"
             else:
                 lose = give_prize(loser)
-                prize_msg=f"🎁 Loser got: {lose}"
+                prize_msg=f"🎁 Loser got: {lose}"'''
         elif game=="Money":
             revenue=100; money_games=1
             if money_ball=="0":
