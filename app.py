@@ -175,7 +175,6 @@ def index():
 
         # MONEY GAME
         elif game == "Money":
-            elif game == "Money":
             revenue = 100
             money_games = 1
             if money_ball == "0":
