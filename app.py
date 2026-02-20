@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask import send_file, request, abort
 import sqlite3
 import random
 
@@ -40,6 +41,13 @@ def init_db():
     conn.commit()
     conn.close()
 
+@app.route("/backup-db")
+def backup_db():
+    # simple secret key protection
+    if request.args.get("key") != "mybackup123":
+        abort(403)
+
+    return send_file("stall_data.db", as_attachment=True)
 # ------------------ Inventory ------------------
 def get_inventory():
     conn = sqlite3.connect(DB)
