@@ -10,24 +10,27 @@ body {
     background: #FFE4B5;
     margin:0;
     padding:0;
+    overflow-x:hidden;
 }
 h1,h2 {text-align:center; margin:5px 0;}
 .container {padding:10px; display:flex; flex-direction:column; align-items:center;}
 button {
-    font-size:1.2em;
-    margin:5px;
-    padding:12px 15px;
+    font-size:1.1em;
+    margin:3px;
+    padding:10px 12px;
     border:none;
     border-radius:10px;
     cursor:pointer;
+    white-space: nowrap;
 }
 button.selected {background-color:#ff69b4; color:white;}
 button.winner {background-color:#32CD32; color:white;}
 button.loser {background-color:#FF4500; color:white;}
 .message {margin:10px; font-size:1.2em; font-weight:bold; text-align:center; color:#00008B;}
-.game-section {border:2px solid #000; border-radius:15px; padding:10px; margin:10px; width:95%;}
+.game-section {border:2px solid #000; border-radius:15px; padding:8px; margin:8px; width:95%;}
 .flex-buttons {display:flex; flex-wrap:wrap; justify-content:center;}
-.play-btn {background-color:#1E90FF;color:white;font-size:1.3em;padding:12px 20px;margin-top:10px;}
+.play-btn {background-color:#1E90FF;color:white;font-size:1.3em;padding:10px 15px;margin-top:8px; width:95%;}
+a button {width:auto;}
 </style>
 </head>
 <body>
@@ -38,6 +41,7 @@ button.loser {background-color:#FF4500; color:white;}
 
 <form method="POST" id="gameForm">
 
+<!-- Game Selection -->
 <div class="game-section">
 <h2>Choose Game</h2>
 <div class="flex-buttons">
@@ -47,6 +51,7 @@ button.loser {background-color:#FF4500; color:white;}
 </div>
 </div>
 
+<!-- Result Selection -->
 <div class="game-section" id="resultSection" style="display:none;">
 <h2>Result</h2>
 <div class="flex-buttons">
@@ -55,6 +60,7 @@ button.loser {background-color:#FF4500; color:white;}
 </div>
 </div>
 
+<!-- Winner Prize -->
 <div class="game-section" id="winnerSection" style="display:none;">
 <h2>Winner Prize</h2>
 <div class="flex-buttons">
@@ -64,6 +70,7 @@ button.loser {background-color:#FF4500; color:white;}
 </div>
 </div>
 
+<!-- Loser Prize -->
 <div class="game-section" id="loserSection" style="display:none;">
 <h2>Loser Prize</h2>
 <div class="flex-buttons">
@@ -76,6 +83,7 @@ button.loser {background-color:#FF4500; color:white;}
 </div>
 </div>
 
+<!-- Money Game -->
 <div class="game-section" id="moneySection" style="display:none;">
 <h2>Money Game Balls</h2>
 <div class="flex-buttons">
@@ -87,7 +95,7 @@ button.loser {background-color:#FF4500; color:white;}
 
 <button type="submit" class="play-btn" id="playBtn" style="display:none;">Play Game</button>
 
-<div class="flex-buttons" style="margin-top:10px;">
+<div class="flex-buttons" style="margin-top:8px;">
 <a href="/report"><button type="button">View Sales Report</button></a>
 </div>
 
@@ -143,7 +151,6 @@ function selectMoney(ball, btn){
     document.getElementById("moneyInput").value=ball;
     highlightBtn(btn,'#moneySection');
 }
-
 </script>
 
 </body>
