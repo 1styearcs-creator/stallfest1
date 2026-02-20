@@ -101,9 +101,9 @@ a {
     <tr><th>Item</th><th>Qty</th><th>Cost Price</th></tr>
     {% for item in inventory %}
     <tr>
-        <td>{{ item }}</td>
-        <td>{{ inventory[item]['qty'] }}</td>
-        <td>{{ inventory[item]['cp'] }}</td>
+        <td>{{item}}</td>
+        <td>{{inventory[item]['qty']}}</td>
+        <td>{{inventory[item]['cp']}}</td>
     </tr>
     {% endfor %}
 </table>
