@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carnival Stall</title>
+<style>
+body{font-family:sans-serif;background:#1a001a;color:white;text-align:center;}
+button{font-size:18px;padding:15px 25px;margin:5px;border-radius:10px;}
+</style>
+</head>
+<body>
+<h1>🎪 Carnival Stall</h1>
+<form method="POST">
+<h2>Select Game</h2>
+<button name="game" value="20">20₹</button>
+<button name="game" value="Battle">Battle</button>
+<button name="game" value="150">150₹</button>
+<button name="game" value="250">250₹ Jackpot</button>
+<button name="game" value="Money">Money Game</button>
+
+<h2>Result</h2>
+<button name="result" value="Win">WIN</button>
+<button name="result" value="Lose">LOSE</button>
+
+<h2>Winner Prize (27-45₹)</h2>
+{% for item in inventory %}
+  {% if inventory[item]['cp'] <=45 %}
+    <button name="winner" value="{{item}}">{{item}}</button>
+  {% endif %}
+{% endfor %}
+
+<h2>Loser Prize (Optional, auto 27₹ if skip)</h2>
+{% for item in inventory %}
+  {% if inventory[item]['cp']==27 %}
+    <button name="loser" value="{{item}}">{{item}}</button>
+  {% endif %}
+{% endfor %}
+
+<h2>Money Game Ball (0/1/2)</h2>
+<button name="money_ball" value="0">0 Ball</button>
+<button name="money_ball" value="1">1 Ball</button>
+<button name="money_ball" value="2">2 Ball</button>
+
+<br><br>
+<input type="submit" value="Play Game" style="padding:15px 30px;font-size:18px;">
+</form>
+
+<h3>{{message}}</h3>
+
+<h2>Inventory</h2>
+{% for item in inventory %}
+{{item}}: {{inventory[item]['qty']}}<br>
+{% endfor %}
+
+<a href="/report" style="color:yellow;">📊 View Sales Report</a>
+</body>
+</html>
