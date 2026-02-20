@@ -1,57 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carnival Stall</title>
+<title>StallFest Mobile</title>
 <style>
-body{font-family:sans-serif;background:#1a001a;color:white;text-align:center;}
-button{font-size:18px;padding:15px 25px;margin:5px;border-radius:10px;}
+body {
+    font-family: Arial, sans-serif;
+    background: #FFE4B5;
+    margin:0;
+    padding:0;
+}
+h1,h2 {text-align:center;}
+.container {padding:10px; display:flex; flex-direction:column; align-items:center;}
+button {
+    font-size:1.2em;
+    margin:5px;
+    padding:15px 20px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+button.selected {background-color:#ff69b4; color:white;}
+button.winner {background-color:#32CD32; color:white;}
+button.loser {background-color:#FF4500; color:white;}
+.message {margin:10px; font-size:1.3em; font-weight:bold; text-align:center; color:#00008B;}
+.game-section {border:2px solid #000; border-radius:15px; padding:10px; margin:10px; width:95%;}
+.flex-buttons {display:flex; flex-wrap:wrap; justify-content:center;}
 </style>
 </head>
 <body>
-<h1>🎪 Carnival Stall</h1>
+<h1>🎡 StallFest Mobile</h1>
+<div class="container">
+
+<div class="message" id="message">{{ message }}</div>
+
 <form method="POST">
-<h2>Select Game</h2>
-<button name="game" value="20">20₹</button>
-<button name="game" value="Battle">Battle</button>
-<button name="game" value="150">150₹</button>
-<button name="game" value="250">250₹ Jackpot</button>
-<button name="game" value="Money">Money Game</button>
+<div class="game-section">
+<h2>Choose Game</h2>
+<div class="flex-buttons">
+<button type="submit" name="game" value="20" onclick="selectBtn(this)">20₹ Coin Game</button>
+<button type="submit" name="game" value="Battle" onclick="selectBtn(this)">Battle Game 220₹</button>
+<button type="submit" name="game" value="150" onclick="selectBtn(this)">Bottle Game 150₹</button>
+<button type="submit" name="game" value="250" onclick="selectBtn(this)">Jackpot 250₹</button>
+<button type="submit" name="game" value="Money" onclick="selectBtn(this)">Money Game 100₹</button>
+</div>
+</div>
 
+<div class="game-section">
 <h2>Result</h2>
-<button name="result" value="Win">WIN</button>
-<button name="result" value="Lose">LOSE</button>
+<div class="flex-buttons">
+<button type="submit" name="result" value="Win" onclick="selectBtn(this)">Win</button>
+<button type="submit" name="result" value="Lose" onclick="selectBtn(this)">Lose</button>
+</div>
+</div>
 
-<h2>Winner Prize (27-45₹)</h2>
+<div class="game-section">
+<h2>Winner Prize</h2>
+<div class="flex-buttons">
 {% for item in inventory %}
-  {% if inventory[item]['cp'] <=45 %}
-    <button name="winner" value="{{item}}">{{item}}</button>
-  {% endif %}
+<button type="submit" name="winner" value="{{item}}" onclick="selectBtn(this)">{{item}} ({{inventory[item]['qty']}})</button>
 {% endfor %}
+</div>
+</div>
 
-<h2>Loser Prize (Optional, auto 27₹ if skip)</h2>
+<div class="game-section">
+<h2>Loser Prize</h2>
+<div class="flex-buttons">
 {% for item in inventory %}
-  {% if inventory[item]['cp']==27 %}
-    <button name="loser" value="{{item}}">{{item}}</button>
-  {% endif %}
+{% if inventory[item]['cp']==27 %}
+<button type="submit" name="loser" value="{{item}}" onclick="selectBtn(this)">{{item}} ({{inventory[item]['qty']}})</button>
+{% endif %}
 {% endfor %}
+<button type="submit" name="loser" value="" onclick="selectBtn(this)">Auto 27₹ Prize</button>
+</div>
+</div>
 
-<h2>Money Game Ball (0/1/2)</h2>
-<button name="money_ball" value="0">0 Ball</button>
-<button name="money_ball" value="1">1 Ball</button>
-<button name="money_ball" value="2">2 Ball</button>
+<div class="game-section">
+<h2>Money Game Balls</h2>
+<div class="flex-buttons">
+<button type="submit" name="money_ball" value="0" onclick="selectBtn(this)">0 Ball</button>
+<button type="submit" name="money_ball" value="1" onclick="selectBtn(this)">1 Ball</button>
+<button type="submit" name="money_ball" value="2" onclick="selectBtn(this)">2 Ball</button>
+</div>
+</div>
 
-<br><br>
-<input type="submit" value="Play Game" style="padding:15px 30px;font-size:18px;">
+<div class="flex-buttons">
+<a href="/report"><button type="button">View Sales Report</button></a>
+</div>
+
 </form>
+</div>
 
-<h3>{{message}}</h3>
+<script>
+function selectBtn(btn){
+    // Remove selected from siblings
+    let buttons = btn.parentNode.querySelectorAll('button');
+    buttons.forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+}
+</script>
 
-<h2>Inventory</h2>
-{% for item in inventory %}
-{{item}}: {{inventory[item]['qty']}}<br>
-{% endfor %}
-
-<a href="/report" style="color:yellow;">📊 View Sales Report</a>
 </body>
 </html>
