@@ -1,169 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stall Game</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            background-color: #ff5722;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        header h1 {
-            font-size: 40px;
-        }
-        .game-section {
-            margin-top: 20px;
-        }
-        .game-section h2 {
-            text-align: center;
-            color: #333;
-        }
-        .game-button {
-            background-color: #4CAF50;
-            color: white;
-            font-size: 18px;
-            padding: 15px;
-            margin: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 200px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .game-button:hover {
-            background-color: #45a049;
-        }
-        .result {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 20px;
-        }
-        .inventory-table, .stats-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StallFest Mobile</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #FFE4B5;
+    margin:0;
+    padding:0;
+    overflow-x:hidden;
+}
+h1,h2 {text-align:center; margin:5px 0;}
+.container {padding:10px; display:flex; flex-direction:column; align-items:center;}
+button {
+    font-size:1.1em;
+    margin:3px;
+    padding:10px 12px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    white-space: nowrap;
+}
+button.selected {background-color:#ff69b4; color:white;}
+button.winner {background-color:#32CD32; color:white;}
+button.loser {background-color:#FF4500; color:white;}
+.message {margin:10px; font-size:1.2em; font-weight:bold; text-align:center; color:#00008B;}
+.game-section {border:2px solid #000; border-radius:15px; padding:8px; margin:8px; width:95%;}
+.flex-buttons {display:flex; flex-wrap:wrap; justify-content:center;}
+.play-btn {background-color:#1E90FF;color:white;font-size:1.3em;padding:10px 15px;margin-top:8px; width:95%;}
+a button {width:auto;}
+</style>
 </head>
 <body>
-    <header>
-        <h1>Stall Festival Game</h1>
-    </header>
-    <div class="container">
-        <div class="game-section">
-            <h2>Select a Game</h2>
-            <form method="POST">
-                <select name="game" class="game-button">
-                    <option value="20">20 ₹ Coin Game</option>
-                    <option value="Battle">Battle Game (220 ₹)</option>
-                    <option value="150">150 ₹ Bottle Game</option>
-                    <option value="250">250 ₹ Jackpot Challenge</option>
-                    <option value="Money">Money Game (100 ₹)</option>
-                </select>
-                <br>
-                <label for="result">Winner Result:</label>
-                <select name="result" class="game-button">
-                    <option value="Win">Winner</option>
-                    <option value="Lose">Loser</option>
-                </select>
-                <br><br>
+<h1>🎡 StallFest Mobile</h1>
+<div class="container">
 
-                <label for="winner">Select Winner Toy:</label>
-                <select name="winner" class="game-button">
-                    {% for toy in inventory %}
-                        <option value="{{ toy }}">{{ toy }}</option>
-                    {% endfor %}
-                </select>
-                <br><br>
+<div class="message" id="message">{{ message }}</div>
 
-                <label for="loser">Select Loser Toy:</label>
-                <select name="loser" class="game-button">
-                    <option value="AUTO">Auto</option>
-                    {% for toy in inventory %}
-                        <option value="{{ toy }}">{{ toy }}</option>
-                    {% endfor %}
-                </select>
-                <br><br>
+<form method="POST" id="gameForm">
 
-                <label for="money_ball">Money Game Balls:</label>
-                <select name="money_ball" class="game-button">
-                    <option value="0">0 Ball</option>
-                    <option value="1">1 Ball</option>
-                    <option value="2">2 Ball</option>
-                </select>
-                <br><br>
+<!-- Game Selection -->
+<div class="game-section">
+<h2>Choose Game</h2>
+<div class="flex-buttons">
+{% for g, label in [('20','20₹ Coin Game'),('Battle','Battle Game 220₹'),('150','Bottle Game 150₹'),('250','Jackpot 250₹'),('Money','Money Game 100₹')] %}
+<button type="button" onclick="selectGame('{{g}}', this)">{{label}}</button>
+{% endfor %}
+</div>
+</div>
 
-                <button type="submit" class="game-button">Play Game</button>
-            </form>
-        </div>
+<!-- Result Selection -->
+<div class="game-section" id="resultSection" style="display:none;">
+<h2>Result</h2>
+<div class="flex-buttons">
+<button type="button" onclick="selectResult('Win', this)">Win</button>
+<button type="button" onclick="selectResult('Lose', this)">Lose</button>
+</div>
+</div>
 
-        <div class="result">
-            <p>{{ message }}</p>
-        </div>
+<!-- Winner Prize -->
+<div class="game-section" id="winnerSection" style="display:none;">
+<h2>Winner Prize</h2>
+<div class="flex-buttons">
+{% for item in inventory %}
+<button type="button" onclick="selectWinner('{{item}}', this)">{{item}} ({{inventory[item]['qty']}})</button>
+{% endfor %}
+</div>
+</div>
 
-        <div class="inventory-section">
-            <h2>Inventory</h2>
-            <table class="inventory-table">
-                <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                    <th>Cost Price</th>
-                </tr>
-                {% for toy, data in inventory.items() %}
-                    <tr>
-                        <td>{{ toy }}</td>
-                        <td>{{ data.qty }}</td>
-                        <td>{{ data.cp }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
+<!-- Loser Prize -->
+<div class="game-section" id="loserSection" style="display:none;">
+<h2>Loser Prize</h2>
+<div class="flex-buttons">
+{% for item in inventory %}
+{% if inventory[item]['cp']==27 %}
+<button type="button" onclick="selectLoser('{{item}}', this)">{{item}} ({{inventory[item]['qty']}})</button>
+{% endif %}
+{% endfor %}
+<button type="button" onclick="selectLoser('AUTO', this)">Auto 27₹ Prize</button>
+</div>
+</div>
 
-        <div class="stats-section">
-            <h2>Stats</h2>
-            <table class="stats-table">
-                <tr>
-                    <th>Total Revenue</th>
-                    <th>Total 20₹ Games</th>
-                    <th>Total Battle Games</th>
-                    <th>Total 150₹ Games</th>
-                    <th>Total 250₹ Games</th>
-                    <th>Total Money Games</th>
-                </tr>
-                <tr>
-                    <td>{{ stats[1] }}</td>
-                    <td>{{ stats[2] }}</td>
-                    <td>{{ stats[3] }}</td>
-                    <td>{{ stats[4] }}</td>
-                    <td>{{ stats[5] }}</td>
-                    <td>{{ stats[6] }}</td>
-                </tr>
-            </table>
-        </div>
-    </div>
+<!-- Money Game -->
+<div class="game-section" id="moneySection" style="display:none;">
+<h2>Money Game Balls</h2>
+<div class="flex-buttons">
+<button type="button" onclick="selectMoney('0', this)">0 Ball</button>
+<button type="button" onclick="selectMoney('1', this)">1 Ball</button>
+<button type="button" onclick="selectMoney('2', this)">2 Ball</button>
+</div>
+</div>
+
+<button type="submit" class="play-btn" id="playBtn" style="display:none;">Play Game</button>
+
+<div class="flex-buttons" style="margin-top:8px;">
+<a href="/report"><button type="button">View Sales Report</button></a>
+</div>
+
+<input type="hidden" name="game" id="gameInput">
+<input type="hidden" name="result" id="resultInput">
+<input type="hidden" name="winner" id="winnerInput">
+<input type="hidden" name="loser" id="loserInput">
+<input type="hidden" name="money_ball" id="moneyInput">
+
+</form>
+</div>
+
+<script>
+let selectedGame="",selectedResult="",selectedWinner="",selectedLoser="",selectedMoney="";
+
+function highlightBtn(btn, parentSelector){
+    let buttons = document.querySelectorAll(parentSelector+' button');
+    buttons.forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+}
+
+function selectGame(game, btn){
+    selectedGame = game;
+    document.getElementById("gameInput").value=game;
+    highlightBtn(btn,'div.flex-buttons');
+    document.getElementById("resultSection").style.display="flex";
+    document.getElementById("winnerSection").style.display="flex";
+    document.getElementById("loserSection").style.display="flex";
+    document.getElementById("moneySection").style.display=(game=="Money")?"flex":"none";
+    document.getElementById("playBtn").style.display="inline-block";
+}
+
+function selectResult(res, btn){
+    selectedResult = res;
+    document.getElementById("resultInput").value=res;
+    highlightBtn(btn,'#resultSection');
+}
+
+function selectWinner(winner, btn){
+    selectedWinner = winner;
+    document.getElementById("winnerInput").value=winner;
+    highlightBtn(btn,'#winnerSection');
+}
+
+function selectLoser(loser, btn){
+    selectedLoser = loser;
+    document.getElementById("loserInput").value=loser;
+    highlightBtn(btn,'#loserSection');
+}
+
+function selectMoney(ball, btn){
+    selectedMoney = ball;
+    document.getElementById("moneyInput").value=ball;
+    highlightBtn(btn,'#moneySection');
+}
+</script>
+
 </body>
 </html>
