@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import sqlite3
+import random 
 
 app = Flask(__name__)
 DB = "stall_data.db"
@@ -87,11 +88,21 @@ def give_prize(name):
     update_qty(name,inv[name]["qty"]-1)
     return name
 
+
 def auto_27():
     inv = get_inventory()
+    # Only 27₹ toys with qty>0
     items=[k for k in inv if inv[k]["cp"]==27 and inv[k]["qty"]>0]
-    if not items: return None
-    return max(items,key=lambda x:inv[x]["qty"])
+    if not items:
+        return None
+    # Find max quantity
+    max_qty = max(inv[k]["qty"] for k in items)
+    # All toys with max quantity
+    max_items = [k for k in items if inv[k]["qty"]==max_qty]
+    # Pick one randomly
+    chosen = random.choice(max_items)
+    update_qty(chosen, inv[chosen]["qty"]-1)
+    return chosen
 
 # --- Routes ---
 @app.route("/", methods=["GET","POST"])
