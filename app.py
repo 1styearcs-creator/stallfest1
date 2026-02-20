@@ -175,17 +175,19 @@ def index():
 
         # MONEY GAME
         elif game == "Money":
+            # MONEY GAME
             money_games = 1
             if not money_ball:
                 prize_msg = "Select Ball Outcome"
                 return render_template("index.html", inventory=inv, stats=stats, message=prize_msg)
+            
             if money_ball == "0":
-                revenue = +100
-                money_profit = +100
+                revenue = 100
+                money_profit = 100
                 prize_msg = "0 Ball: Revenue +100, Profit +100"
             elif money_ball == "1":
-                revenue = +0
-                money_profit = +0
+                revenue = 0
+                money_profit = 0
                 prize_msg = "1 Ball: Revenue 0, Profit 0"
             elif money_ball == "2":
                 revenue = -900
