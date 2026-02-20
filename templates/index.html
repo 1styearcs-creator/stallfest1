@@ -8,72 +8,29 @@
 body {
     font-family: Arial, sans-serif;
     background: #FFE4B5;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
+    margin:0;
+    padding:0;
+    overflow-x:hidden;
 }
-h1, h2 {
-    text-align: center;
-    margin: 5px 0;
-    color: #ff6347;
-}
-.container {
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+h1,h2 {text-align:center; margin:5px 0;}
+.container {padding:10px; display:flex; flex-direction:column; align-items:center;}
 button {
-    font-size: 1.1em;
-    margin: 3px;
-    padding: 10px 12px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
+    font-size:1.1em;
+    margin:3px;
+    padding:10px 12px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
     white-space: nowrap;
 }
-button.selected {
-    background-color: #ff69b4;
-    color: white;
-}
-button.winner {
-    background-color: #32CD32;
-    color: white;
-}
-button.loser {
-    background-color: #FF4500;
-    color: white;
-}
-.message {
-    margin: 10px;
-    font-size: 1.2em;
-    font-weight: bold;
-    text-align: center;
-    color: #00008B;
-}
-.game-section {
-    border: 2px solid #000;
-    border-radius: 15px;
-    padding: 8px;
-    margin: 8px;
-    width: 95%;
-}
-.flex-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.play-btn {
-    background-color: #1E90FF;
-    color: white;
-    font-size: 1.3em;
-    padding: 10px 15px;
-    margin-top: 8px;
-    width: 95%;
-}
-a button {
-    width: auto;
-}
+button.selected {background-color:#ff69b4; color:white;}
+button.winner {background-color:#32CD32; color:white;}
+button.loser {background-color:#FF4500; color:white;}
+.message {margin:10px; font-size:1.2em; font-weight:bold; text-align:center; color:#00008B;}
+.game-section {border:2px solid #000; border-radius:15px; padding:8px; margin:8px; width:95%;}
+.flex-buttons {display:flex; flex-wrap:wrap; justify-content:center;}
+.play-btn {background-color:#1E90FF;color:white;font-size:1.3em;padding:10px 15px;margin-top:8px; width:95%;}
+a button {width:auto;}
 </style>
 </head>
 <body>
@@ -152,53 +109,47 @@ a button {
 </div>
 
 <script>
-let selectedGame="", selectedResult="", selectedWinner="", selectedLoser="", selectedMoney="";
+let selectedGame="",selectedResult="",selectedWinner="",selectedLoser="",selectedMoney="";
 
-// Function to highlight selected button
 function highlightBtn(btn, parentSelector){
-    let buttons = document.querySelectorAll(parentSelector + ' button');
-    buttons.forEach(b => b.classList.remove('selected'));
+    let buttons = document.querySelectorAll(parentSelector+' button');
+    buttons.forEach(b=>b.classList.remove('selected'));
     btn.classList.add('selected');
 }
 
-// Game selection
 function selectGame(game, btn){
     selectedGame = game;
-    document.getElementById("gameInput").value = game;
-    highlightBtn(btn, 'div.flex-buttons');
-    document.getElementById("resultSection").style.display = "flex";
-    document.getElementById("winnerSection").style.display = "flex";
-    document.getElementById("loserSection").style.display = "flex";
-    document.getElementById("moneySection").style.display = (game == "Money") ? "flex" : "none";
-    document.getElementById("playBtn").style.display = "inline-block";
+    document.getElementById("gameInput").value=game;
+    highlightBtn(btn,'div.flex-buttons');
+    document.getElementById("resultSection").style.display="flex";
+    document.getElementById("winnerSection").style.display="flex";
+    document.getElementById("loserSection").style.display="flex";
+    document.getElementById("moneySection").style.display=(game=="Money")?"flex":"none";
+    document.getElementById("playBtn").style.display="inline-block";
 }
 
-// Result selection
 function selectResult(res, btn){
     selectedResult = res;
-    document.getElementById("resultInput").value = res;
-    highlightBtn(btn, '#resultSection');
+    document.getElementById("resultInput").value=res;
+    highlightBtn(btn,'#resultSection');
 }
 
-// Winner selection
 function selectWinner(winner, btn){
     selectedWinner = winner;
-    document.getElementById("winnerInput").value = winner;
-    highlightBtn(btn, '#winnerSection');
+    document.getElementById("winnerInput").value=winner;
+    highlightBtn(btn,'#winnerSection');
 }
 
-// Loser selection
 function selectLoser(loser, btn){
     selectedLoser = loser;
-    document.getElementById("loserInput").value = loser;
-    highlightBtn(btn, '#loserSection');
+    document.getElementById("loserInput").value=loser;
+    highlightBtn(btn,'#loserSection');
 }
 
-// Money game selection
 function selectMoney(ball, btn){
     selectedMoney = ball;
-    document.getElementById("moneyInput").value = ball;
-    highlightBtn(btn, '#moneySection');
+    document.getElementById("moneyInput").value=ball;
+    highlightBtn(btn,'#moneySection');
 }
 </script>
 
