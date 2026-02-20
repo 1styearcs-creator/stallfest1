@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Report</title>
+<style>
+body{font-family:sans-serif;background:#1a001a;color:white;text-align:center;}
+table{margin:auto;border-collapse:collapse;width:90%;}
+th,td{border:1px solid white;padding:10px;}
+</style>
+</head>
+<body>
+<h1>📊 Sales Report</h1>
+<table>
+<tr><th>GAME</th><th>Revenue</th></tr>
+<tr><td>20₹</td><td>{{stats[2]*20}}</td></tr>
+<tr><td>Battle</td><td>{{stats[3]*220}}</td></tr>
+<tr><td>150₹</td><td>{{stats[4]*150}}</td></tr>
+<tr><td>250₹</td><td>{{stats[5]*250}}</td></tr>
+<tr><td>Money Game Profit</td><td>{{stats[7]}}</td></tr>
+<tr><th>Total Profit</th><th>{{stats[1]+stats[7]}}</th></tr>
+</table>
+<br>
+<a href="/" style="color:yellow;">⬅ Back</a>
+</body>
+</html>
